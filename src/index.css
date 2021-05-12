@@ -11,3 +11,20 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.wrapper {
+  margin: 0 auto;
+  width: 500px;
+}
+
+.wrapper h1{
+  text-align: center;
+}
+
+.done {
+  text-decoration: line-through;
+}
+
+.button-delete {
+  color: red;
+}
