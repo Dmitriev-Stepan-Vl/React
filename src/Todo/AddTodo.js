@@ -1,27 +1,36 @@
 import PropTypes from 'prop-types'
 import React, {useState, useEffect} from 'react'
 
-function AddTodo({onCreate, todos, setTodos, editTodo, setEditTodo}) {
+function AddTodo({onCreate, todos, editTodo, setEditTodo, setUpdateTasks}) {
     const [value, setValue] = useState('')
+    const urlTasks = 'http://185.246.66.84:3000/sdmitriev/tasks/'
 
     function updateTodo(title, id, completed, sequence) {
-        const newTodo = todos.map((todo) => 
-            todo.id === id ? {title, id, completed, sequence} : todo
+        const data = {title: title,completed: completed, sequence: sequence}
+        todos.map((todo) => 
+            todo.id === id ?  data : todo
         )
-        setTodos(newTodo)
+        fetch(urlTasks + id, {
+        method: 'PUT',
+        headers: {'Content-type': 'application/json; charset=UTF-8'},
+        body: JSON.stringify(data)
+        })
+        .catch(err => console.log(err))
+        setUpdateTasks(true)
+        //setTodos(newTodo)
         setEditTodo(null)
     }
 
     useEffect(() => {
         if(editTodo) {
-            //setInput(editTodo.title)
+            setValue(editTodo.title)
         } else {
-            //setInput("")
+            setValue("")
         }
     }, [editTodo])
 
     function submitHandler(e) {
-        e.preventDefault()  // <- Отмена
+        e.preventDefault() 
         if(!editTodo) {
             if(value.trim()) {
                 onCreate(value)
@@ -33,9 +42,11 @@ function AddTodo({onCreate, todos, setTodos, editTodo, setEditTodo}) {
     }
 
     return (
-        <form onSubmit={submitHandler}>
-            <input value={value} onChange={e => setValue(e.target.value)}/>
-            <button type="submit">Добавить задачу</button>
+        <form className="form" onSubmit={submitHandler}>
+            <input className="form-input" value={value} placeholder="Введите задачу..." onChange={e => setValue(e.target.value)}/>
+            <button className="form-button" type="submit">
+                {editTodo ? "Применить" : "Добавить"}
+            </button>
         </form>
     )
 }
