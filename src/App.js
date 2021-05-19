@@ -171,7 +171,7 @@ function App() {
       })
       .catch(err => console.log(err))
       setUpdateTasks(true)
-    //setTodosDone(todosDone.filter(todo => todo.id !== id))
+    //setTodosDone(todosDone.filter(todo => todo.id !== id))s
     //setTodos(todos.concat([cur])) 
   }
 
