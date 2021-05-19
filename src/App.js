@@ -11,7 +11,7 @@ function App() {
   /*  
     {id: 0, sequence: 0, completed: false, title: 'Задача 1'},
     {id: 1, sequence: 1, completed: false, title: 'Задача 2'},
-    {id: 2, sequence: 2, completed: false, title: 'Задача 3'}  
+    {id: 2, sequence: 2, completed: false, title: sss'Задача 3'}  
   */
   const [todosDone, setTodosDone] = useState([])
   const [updateTasks, setUpdateTasks] = useState(null)
