@@ -2,9 +2,11 @@ import React, {useEffect, useState} from 'react'
 import TodoList from './Todo/TodoList'
 import AddTodo from './Todo/AddTodo'
 import Context from './context'
+import axios from 'axios'
 
 function App() {
   const urlTasks = 'http://185.246.66.84:3000/sdmitriev/tasks/'
+  const urlSubTasks = 'http://185.246.66.84:3000/sdmitriev/subtasks/'
   const [todos, setTodos] = useState([])
   /*  
     {id: 0, sequence: 0, completed: false, title: 'Задача 1'},
@@ -16,22 +18,61 @@ function App() {
   const [editTodo, setEditTodo] = useState(null)
 
   useEffect(() => {  
-    fetch(urlTasks)
+    axios.get(urlTasks)
+    .then(async res => { 
+          const parList = res.data;
+          const myList = await Promise.all(
+          parList.map(async item => {
+            const subTasks = (await axios.get(urlSubTasks+'?taskId='+item.id)).data
+            return {
+              ...item,
+              subTasks
+            }
+          })
+          )
+          setTodos(myList.filter(todo => todo.completed === false))
+          setTodosDone(myList.filter(todo => todo.completed === true))
+          })
+    .then(setUpdateTasks(null))
+    .catch(err => console.log(err))
+    //
+    /*fetch(urlTasks)
     .then(response => response.json())
     .then(data => {
       setTodos(data.filter(todo => todo.completed === false))
       setTodosDone(data.filter(todo => todo.completed === true))
-    })    
-    setUpdateTasks(null)
+    })    */
   }, [updateTasks])  
 
   function removeTodo(id) {
+    const items = Array.from(todos)
+    let subTasks = {}
+    items.forEach(element => {
+      if(element.id === id) {
+        subTasks = element.subTasks
+      }
+    });
+    if(subTasks) {
+      subTasks.forEach((element, index) => {
+        fetch(urlSubTasks + (index + 1), {
+        method: 'DELETE',
+        })
+        .catch(err => console.log(err))
+      });
+    }
     fetch(urlTasks + id, {
       method: 'DELETE',
     })
+    .then(setUpdateTasks(true))
     .catch(err => console.log(err))
-    setUpdateTasks(true)
-    //setTodos(todos.filter(todo => todo.id !== id))
+  }
+
+  function removeSubTodo(todoId ,id) {
+    fetch(urlSubTasks + id, {
+      method: 'DELETE',
+    })
+    .then(updateTodoSubTasks(todoId))
+    .catch(err => console.log(err))
   }
 
   function addTodo(title) {
@@ -45,15 +86,54 @@ function App() {
       headers: {"Content-type": "application/json; charset=UTF-8"},
       body: JSON.stringify(data) 
     })
+    .then(setUpdateTasks(true))
     .catch(err => console.log(err))
-    setUpdateTasks(true)
-    /*setTodos(todos.concat([{
-      title: title,
-      id: Date.now(),
-      completed: false,
-      sequence: todos.length
-    }]))*/
   }
+  
+  function addSubTask(id) {
+    let data = {
+      title: ('Подзадача ' + id),
+      completed: false,
+      sequence: 1,
+      taskId: id
+    }
+    fetch(urlSubTasks, {  
+      method: 'POST', 
+      headers: {"Content-type": "application/json; charset=UTF-8"},
+      body: JSON.stringify(data) 
+    })
+    .then(updateTodoSubTasks(id))
+    .catch(err => console.log(err))  
+  }
+
+  function updateTodoSubTasks(id) { 
+    axios.get(urlTasks)
+    .then(async res => { 
+          const parList = res.data;
+          const myList = await Promise.all(
+          parList.map(async item => {
+            const subTasks = (await axios.get(urlSubTasks+'?taskId='+item.id)).data
+            return {
+              ...item,
+              subTasks
+            }
+          })
+          )
+          myList.forEach((element) => {
+            if(element.id === id) {
+              fetch(urlTasks + id, {
+                method: 'PUT',
+                headers: {'Content-type': 'application/json; charset=UTF-8'},
+                body: JSON.stringify(element)
+                })
+              .catch(err => console.log(err))
+            }
+          });          
+    })
+    .then(setUpdateTasks(true))
+    .catch(err => console.log(err))
+  }
+  
 
   function toggleTodo(id) {
     let cur = {}
@@ -69,8 +149,8 @@ function App() {
       headers: {'Content-type': 'application/json; charset=UTF-8'},
       body: JSON.stringify(cur)
       })
+      .then(setUpdateTasks(true))
       .catch(err => console.log(err))
-      setUpdateTasks(true)
     //removeTodo(id)
     //setTodosDone(todosDone.concat([cur]))    
   }
@@ -100,11 +180,29 @@ function App() {
     setEditTodo(findTodo)
   }
 
+  function handleEditSubTask(todoId, id) {
+    let findTodo = {}
+    todos.forEach((todo) => {
+      if(todo.id === todoId) {
+        todo.subTasks.forEach((curr) => {
+          if(curr.id === id) {
+            findTodo = curr
+          }
+        })
+      }
+    })
+    setEditTodo(findTodo)
+  }
+
+
   return (
     <Context.Provider value={{
       removeTodo,
+      removeSubTodo,
       restoreTodo,
-      handleEdit
+      handleEdit,
+      handleEditSubTask,
+      addSubTask
     }}>
       <div className="wrapper">
         <div className="todo">

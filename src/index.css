@@ -15,7 +15,7 @@ p {
 
 .wrapper {
   text-align: center;
-  width: 40%;
+  width: 50%;
   margin: 0 auto;
   color: #181818;
   min-height: 90vh;
@@ -39,6 +39,8 @@ h1 {
 }
 
 .todo-list {
+  display: flex;
+  flex-direction: column;
   min-height: 40vh;
   background-color: #ffffff;
 }
@@ -56,7 +58,8 @@ h1 {
 .ul {
   list-style: none;
   margin: 0;
-  padding: 0 10px 0 10px;
+  padding: 0;
+  width: 100%;
 }
 
 .ul li:last-child {
@@ -67,27 +70,45 @@ h1 {
   list-style: none;
   font-size: 16px;
   width: 100%;
-  max-width: 100%;
+  min-width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  text-align: justify;
-  border-bottom: 1px solid #777777;
-  padding-top: 15px;
-  padding-bottom: 15px;
+  flex-direction: column;
+  /*border-bottom: 1px solid #777777;*/
 }
 
-.list-item:hover {
+/*.list-item:hover {
   background: #7a9bff;
-}
+}*/
 
 .list-item-active {
   text-decoration: none;
   color: black;
 }
 
+.tasks {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+
+.tasks:hover {
+  background: #7a9bff;
+}
+
+.subtasks {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 .done {
   text-decoration: line-through;
+}
+
+.li-subtasks {
+  padding-left: 20px;
 }
 
 .task-title {
@@ -143,8 +164,20 @@ h1 {
   font-weight: bold;
 }
 
-.form {
+.button-add-subtask {
+  outline: none;
+  border: none;
+  border-radius: 20px;
+  margin-right: 10px;
+  background-color: #3366ff;
+  color: #ffffff;
+  width: 40px;
+  height: 30px;
+  font-size: 16px;
+  font-weight: bold;
+}
 
+.form {
   color: #ffffff;
 }
 
@@ -194,6 +227,12 @@ h1 {
 }
 
 .button-restore:hover {
+  background: #ffffff;
+  color: #3366ff;
+  cursor:pointer;
+}
+
+.button-add-subtask:hover {
   background: #ffffff;
   color: #3366ff;
   cursor:pointer;

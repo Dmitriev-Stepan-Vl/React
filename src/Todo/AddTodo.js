@@ -4,21 +4,30 @@ import React, {useState, useEffect} from 'react'
 function AddTodo({onCreate, todos, editTodo, setEditTodo, setUpdateTasks}) {
     const [value, setValue] = useState('')
     const urlTasks = 'http://185.246.66.84:3000/sdmitriev/tasks/'
+    const urlSubTasks = 'http://185.246.66.84:3000/sdmitriev/subtasks/'
 
-    function updateTodo(title, id, completed, sequence) {
-        const data = {title: title,completed: completed, sequence: sequence}
-        todos.map((todo) => 
-            todo.id === id ?  data : todo
-        )
-        fetch(urlTasks + id, {
-        method: 'PUT',
-        headers: {'Content-type': 'application/json; charset=UTF-8'},
-        body: JSON.stringify(data)
-        })
-        .catch(err => console.log(err))
-        setUpdateTasks(true)
-        //setTodos(newTodo)
-        setEditTodo(null)
+    function updateTodo(title, editTodo, id, completed, sequence) {
+        if (!editTodo.taskId) {
+            const data = {title: title,completed: completed, sequence: sequence}
+            fetch(urlTasks + id, {
+            method: 'PUT',
+            headers: {'Content-type': 'application/json; charset=UTF-8'},
+            body: JSON.stringify(data)
+            })
+            .catch(err => console.log(err))
+            setUpdateTasks(true)
+            setEditTodo(null)
+        } else {
+            const data = {title: title,completed: completed, sequence: sequence, taskId: editTodo.taskId}            
+            fetch(urlSubTasks + id, {
+            method: 'PUT',
+            headers: {'Content-type': 'application/json; charset=UTF-8'},
+            body: JSON.stringify(data)
+            })
+            .catch(err => console.log(err))
+            setUpdateTasks(true)
+            setEditTodo(null)
+        }        
     }
 
     useEffect(() => {
@@ -37,7 +46,7 @@ function AddTodo({onCreate, todos, editTodo, setEditTodo, setUpdateTasks}) {
                 setValue('')
             }
         } else {
-            updateTodo(value, editTodo.id, editTodo.completed, editTodo.sequence)
+            updateTodo(value, editTodo, editTodo.id, editTodo.completed, editTodo.sequence)
         }
     }
 

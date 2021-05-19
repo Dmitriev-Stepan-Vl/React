@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import TodoItem from './TodoItem'
 
-function TodoList({ todos, onChange }) {
+function TodoList({ todos, parentTodo, onChange  }) {
     return (
         <ul className="ul">
             { todos.map((todo) => {
@@ -11,6 +11,7 @@ function TodoList({ todos, onChange }) {
                         key={todo.id}
                         todo={todo} 
                         onChange={onChange}
+                        parentTodo={parentTodo}
                     />
                 )
             })}
@@ -20,7 +21,8 @@ function TodoList({ todos, onChange }) {
 
 TodoList.propTypes = {
     todos: PropTypes.arrayOf(PropTypes.object),
-    onChange: PropTypes.func
+    onChange: PropTypes.func,
+    parentTodo: PropTypes.object
 }
 
 export default TodoList
