@@ -15,8 +15,8 @@ function AddTodo({onCreate, todos, editTodo, setEditTodo, setUpdateTasks}) {
         headers: {'Content-type': 'application/json; charset=UTF-8'},
         body: JSON.stringify(data)
         })
+        .then(setUpdateTasks(true))
         .catch(err => console.log(err))
-        setUpdateTasks(true)
         //setTodos(newTodo)
         setEditTodo(null)
     }

@@ -21,6 +21,7 @@ function TodoItem({ todo, onChange }) {
                         checked={todo.completed}
                         onChange={() => onChange(todo.id)}
                     />
+                    { todo.sequence }
                     <span className="task-title">
                         { todo.title }
                     </span>
@@ -39,6 +40,7 @@ function TodoItem({ todo, onChange }) {
                     checked={todo.completed}
                     onChange={() => {return false}}      
                 />
+                { todo.sequence }
                 <span className="task-title">
                     { todo.title }
                 </span>

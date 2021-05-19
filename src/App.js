@@ -5,12 +5,12 @@ import Context from './context'
 
 function App() {
   const urlTasks = 'http://185.246.66.84:3000/sdmitriev/tasks/'
-  const [todos, setTodos] = useState([])
-  /*  
+   /*  
     {id: 0, sequence: 0, completed: false, title: 'Задача 1'},
     {id: 1, sequence: 1, completed: false, title: 'Задача 2'},
     {id: 2, sequence: 2, completed: false, title: 'Задача 3'}  
   */
+  const [todos, setTodos] = useState([]) 
   const [todosDone, setTodosDone] = useState([])
   const [updateTasks, setUpdateTasks] = useState(null)
   const [editTodo, setEditTodo] = useState(null)
@@ -22,37 +22,31 @@ function App() {
       setTodos(data.filter(todo => todo.completed === false))
       setTodosDone(data.filter(todo => todo.completed === true))
     })    
-    setUpdateTasks(null)
-  }, [updateTasks])  
+    .then(setUpdateTasks(null))
+    .catch(err => console.log(err))
+  }, [updateTasks])
 
   function removeTodo(id) {
     fetch(urlTasks + id, {
       method: 'DELETE',
     })
+    .then(setUpdateTasks(true))
     .catch(err => console.log(err))
-    setUpdateTasks(true)
-    //setTodos(todos.filter(todo => todo.id !== id))
   }
 
   function addTodo(title) {
     let data = {
       title: title,
       completed: false,
-      sequence: (todos.length + todosDone.length)
+      sequence: (todos.length? todos.length : 0)
     }
     fetch(urlTasks, {  
       method: 'POST', 
       headers: {"Content-type": "application/json; charset=UTF-8"},
       body: JSON.stringify(data) 
     })
+    .then(setUpdateTasks(true))
     .catch(err => console.log(err))
-    setUpdateTasks(true)
-    /*setTodos(todos.concat([{
-      title: title,
-      id: Date.now(),
-      completed: false,
-      sequence: todos.length
-    }]))*/
   }
 
   function toggleTodo(id) {
@@ -60,7 +54,7 @@ function App() {
     setTodos(todos.map(todo => {
       if (todo.id === id) {
         todo.completed = !todo.completed
-        cur = todo
+        Object.assign(cur, todo)
       }
       return todo
     }))
@@ -69,10 +63,8 @@ function App() {
       headers: {'Content-type': 'application/json; charset=UTF-8'},
       body: JSON.stringify(cur)
       })
-      .catch(err => console.log(err))
-      setUpdateTasks(true)
-    //removeTodo(id)
-    //setTodosDone(todosDone.concat([cur]))    
+    .then(setUpdateTasks(true)) 
+    .catch(err => console.log(err))
   }
 
   function restoreTodo(id) {
@@ -80,7 +72,8 @@ function App() {
     setTodosDone(todosDone.map(todo => {
       if (todo.id === id) {
         todo.completed = !todo.completed
-        cur = todo
+        todo.sequence = (todos.length? Date.now() : 0)
+        Object.assign(cur, todo)
       }
       return todo
     }))
@@ -89,15 +82,35 @@ function App() {
       headers: {'Content-type': 'application/json; charset=UTF-8'},
       body: JSON.stringify(cur)
       })
-      .catch(err => console.log(err))
-      setUpdateTasks(true)
-    //setTodosDone(todosDone.filter(todo => todo.id !== id))
-    //setTodos(todos.concat([cur])) 
+     .then(setUpdateTasks(true))
+    .catch(err => console.log(err))
   }
 
   function handleEdit(id) {
     const findTodo = todos.find((todo) => todo.id === id)
     setEditTodo(findTodo)
+  }
+
+  function updateSequence(result) {
+    const items = Array.from(todos)
+    const sourceIndex = result.source.index
+    const destinationIndex = result.destination.index
+    const [reorderedItem] = items.splice(sourceIndex, 1)
+    items.splice(destinationIndex, 0, reorderedItem)    
+    items.forEach((element, index) => {          
+      console.log("i: " + index + " el.seq: " + element.sequence)  
+      if(element.sequence !== index) { 
+        element.sequence = index
+        console.log(element.sequence)  
+        fetch(urlTasks + element.id, {        
+          method: 'PUT',
+          headers: {'Content-type': 'application/json; charset=UTF-8'},
+          body: JSON.stringify(element)
+        }) 
+        .catch(err => console.log(err))
+      }
+    });    
+    setUpdateTasks(true)
   }
 
   return (
@@ -112,9 +125,9 @@ function App() {
           <AddTodo onCreate={addTodo} todos={todos} editTodo={editTodo} setEditTodo={setEditTodo} setUpdateTasks={setUpdateTasks}/>
       </div>
         <div className="todo-list">
-          {todos.length ? (<TodoList todos={todos} onChange={toggleTodo} />) : (<p>Нет задач</p>)}
+          {todos.length ? (<TodoList todos={todos} onChange={toggleTodo} updateSequence={updateSequence} />) : (<p>Нет задач</p>)}
           <h1 className="todo-list-h1">Список завершенных задач</h1>
-          {todosDone.length ? (<TodoList todos={todosDone} />) : (<p>Нет задач</p>)}   
+          {todosDone.length ? (<TodoList todos={todosDone} updateSequence={updateSequence} />) : (<p>Нет задач</p>)}   
         </div>  
     </div>
     </Context.Provider>    
