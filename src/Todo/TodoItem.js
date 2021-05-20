@@ -7,6 +7,7 @@ function TodoItem({ todo, parentTodo, onChange }) {
     const {removeTodo} = useContext(Context)
     const {removeSubTodo} = useContext(Context)
     const {restoreTodo} = useContext(Context)
+    const {restoreSubTodo} = useContext(Context)    
     const {handleEdit} = useContext(Context)
     const {handleEditSubTask} = useContext(Context)
     const {addSubTask} = useContext(Context)    
@@ -62,7 +63,7 @@ function TodoItem({ todo, parentTodo, onChange }) {
                     </span>
                 </span>
                 <span>
-                {!parentTodo ? <button className="button-restore" onClick={() => restoreTodo(todo.id)}>Восстановить</button> : null}
+                {!parentTodo || !parentTodo.completed ? <button className="button-restore" onClick={() => !parentTodo ? restoreTodo(todo.id) : restoreSubTodo(parentTodo.id, todo.id)}>Восстановить</button> : null}
                 </span>
             </span>
             {todo.subtasks || !parentTodo ? (

@@ -211,21 +211,27 @@ function App() {
       })
     .then(updateTodoSubTasks(id))
     .catch(err => console.log(err))
-    /*let cur = {}
-    setTodosDone(todosDone.map(todo => {
-      if (todo.id === id) {
-        todo.completed = !todo.completed
-        cur = todo
+  }
+
+  function restoreSubTodo(todoId, id) {
+    let restoreSubTodo = {}
+    todos.forEach((todo) => {
+      if(todo.id === todoId) {
+        todo.subTasks.forEach((curr) => {
+          if(curr.id === id) {
+            curr.completed = !curr.completed
+            restoreSubTodo = curr
+          }
+        })
       }
-      return todo
-    }))
-    fetch(urlTasks + id, {
+    })
+    fetch(urlSubTasks + id, {
       method: 'PUT',
       headers: {'Content-type': 'application/json; charset=UTF-8'},
-      body: JSON.stringify(cur)
+      body: JSON.stringify(restoreSubTodo)
       })
+      .then(updateTodoSubTasks(todoId))
       .catch(err => console.log(err))
-      setUpdateTasks(true)*/
   }
 
   function handleEdit(id) {
@@ -253,6 +259,7 @@ function App() {
       removeTodo,
       removeSubTodo,
       restoreTodo,
+      restoreSubTodo,
       handleEdit,
       handleEditSubTask,
       toggleSubTodo,
