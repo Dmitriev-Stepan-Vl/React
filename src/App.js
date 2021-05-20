@@ -35,13 +35,6 @@ function App() {
           })
     .then(setUpdateTasks(null))
     .catch(err => console.log(err))
-    //
-    /*fetch(urlTasks)
-    .then(response => response.json())
-    .then(data => {
-      setTodos(data.filter(todo => todo.completed === false))
-      setTodosDone(data.filter(todo => todo.completed === true))
-    })    */
   }, [updateTasks])  
 
   function removeTodo(id) {
@@ -52,9 +45,9 @@ function App() {
         subTasks = element.subTasks
       }
     });
-    if(subTasks) {
-      subTasks.forEach((element, index) => {
-        fetch(urlSubTasks + (index + 1), {
+    if(subTasks.length !== 0) {
+      subTasks.forEach((element) => {
+        fetch(urlSubTasks + element.id, {
         method: 'DELETE',
         })
         .catch(err => console.log(err))
@@ -132,31 +125,93 @@ function App() {
     })
     .then(setUpdateTasks(true))
     .catch(err => console.log(err))
-  }
-  
+  }  
 
   function toggleTodo(id) {
+    const items = Array.from(todos)
     let cur = {}
-    setTodos(todos.map(todo => {
-      if (todo.id === id) {
-        todo.completed = !todo.completed
-        cur = todo
+    let subTasks = {}
+    items.forEach(element => {
+      if(element.id === id) {
+        subTasks = element.subTasks
+        element.completed = !element.completed
+        cur = element
       }
-      return todo
-    }))
+    });
+    if(subTasks.length !== 0) {
+      subTasks.forEach((element) => {
+        if(!element.completed) {
+          element.completed = true
+          fetch(urlSubTasks + element.id, {
+          method: 'PUT',
+          headers: {'Content-type': 'application/json; charset=UTF-8'},
+          body: JSON.stringify(element)
+          })
+          .catch(err => console.log(err))
+        }
+      });
+    }
     fetch(urlTasks + id, {
       method: 'PUT',
       headers: {'Content-type': 'application/json; charset=UTF-8'},
       body: JSON.stringify(cur)
       })
-      .then(setUpdateTasks(true))
+    .then(updateTodoSubTasks(id))
+    .catch(err => console.log(err))
+  }
+
+  function toggleSubTodo(todoId, id) {
+    let toggleSubTodo = {}
+    todos.forEach((todo) => {
+      if(todo.id === todoId) {
+        todo.subTasks.forEach((curr) => {
+          if(curr.id === id) {
+            curr.completed = !curr.completed
+            toggleSubTodo = curr
+          }
+        })
+      }
+    })
+    fetch(urlSubTasks + id, {
+      method: 'PUT',
+      headers: {'Content-type': 'application/json; charset=UTF-8'},
+      body: JSON.stringify(toggleSubTodo)
+      })
+      .then(updateTodoSubTasks(todoId))
       .catch(err => console.log(err))
-    //removeTodo(id)
-    //setTodosDone(todosDone.concat([cur]))    
   }
 
   function restoreTodo(id) {
+    const items = Array.from(todosDone)
+    let subTasks = {}
     let cur = {}
+    items.forEach(element => {
+      if(element.id === id) {
+        subTasks = element.subTasks
+        element.completed = !element.completed
+        cur = element
+      }
+    });
+    console.log(subTasks)
+    if(subTasks.length !== 0) {
+      subTasks.forEach((element) => {
+        element.completed = false
+        fetch(urlSubTasks + element.id, {
+        method: 'PUT',
+        headers: {'Content-type': 'application/json; charset=UTF-8'},
+        body: JSON.stringify(element)
+        })
+        .catch(err => console.log(err))
+      });
+    }
+    fetch(urlTasks + id, {
+      method: 'PUT',
+      headers: {'Content-type': 'application/json; charset=UTF-8'},
+      body: JSON.stringify(cur)
+      })
+    .then(updateTodoSubTasks(id))
+    .catch(err => console.log(err))
+    /*let cur = {}
     setTodosDone(todosDone.map(todo => {
       if (todo.id === id) {
         todo.completed = !todo.completed
@@ -170,9 +225,7 @@ function App() {
       body: JSON.stringify(cur)
       })
       .catch(err => console.log(err))
-      setUpdateTasks(true)
-    //setTodosDone(todosDone.filter(todo => todo.id !== id))s
-    //setTodos(todos.concat([cur])) 
+      setUpdateTasks(true)*/
   }
 
   function handleEdit(id) {
@@ -202,6 +255,8 @@ function App() {
       restoreTodo,
       handleEdit,
       handleEditSubTask,
+      toggleSubTodo,
+      updateTodoSubTasks,
       addSubTask
     }}>
       <div className="wrapper">

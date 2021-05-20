@@ -10,6 +10,7 @@ function TodoItem({ todo, parentTodo, onChange }) {
     const {handleEdit} = useContext(Context)
     const {handleEditSubTask} = useContext(Context)
     const {addSubTask} = useContext(Context)    
+    const {toggleSubTodo} = useContext(Context)        
     
     const classes = [];
     if (todo.completed) {
@@ -28,7 +29,7 @@ function TodoItem({ todo, parentTodo, onChange }) {
                             className="checkbox"
                             type="checkbox"
                             checked={todo.completed}
-                            onChange={() => onChange(todo.id)}
+                            onChange={() => !parentTodo ? onChange(todo.id) : toggleSubTodo(parentTodo.id, todo.id)}
                         />
                         {!parentTodo ? <button className="button-add-subtask" onClick={() => addSubTask(todo.id)}>+</button> : null}
                         <span className="task-title">
@@ -61,7 +62,7 @@ function TodoItem({ todo, parentTodo, onChange }) {
                     </span>
                 </span>
                 <span>
-                    <button className="button-restore" onClick={() => restoreTodo(todo.id)}>Восстановить</button>
+                {!parentTodo ? <button className="button-restore" onClick={() => restoreTodo(todo.id)}>Восстановить</button> : null}
                 </span>
             </span>
             {todo.subtasks || !parentTodo ? (

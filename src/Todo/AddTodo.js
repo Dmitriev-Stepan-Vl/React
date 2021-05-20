@@ -1,10 +1,12 @@
 import PropTypes from 'prop-types'
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useContext} from 'react'
+import Context from '../context'
 
 function AddTodo({onCreate, todos, editTodo, setEditTodo, setUpdateTasks}) {
     const [value, setValue] = useState('')
     const urlTasks = 'http://185.246.66.84:3000/sdmitriev/tasks/'
     const urlSubTasks = 'http://185.246.66.84:3000/sdmitriev/subtasks/'
+    const {updateTodoSubTasks} = useContext(Context)     
 
     function updateTodo(title, editTodo, id, completed, sequence) {
         if (!editTodo.taskId) {
@@ -25,8 +27,8 @@ function AddTodo({onCreate, todos, editTodo, setEditTodo, setUpdateTasks}) {
             body: JSON.stringify(data)
             })
             .catch(err => console.log(err))
-            setUpdateTasks(true)
             setEditTodo(null)
+            updateTodoSubTasks(editTodo.taskId)
         }        
     }
 
